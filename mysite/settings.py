@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     
     'blog.apps.BlogConfig',  # Класс BlogConfig – это конфигурация приложения. Теперь Django знает,что для этого проекта приложение является активным, и сможет загружать модели приложения.
+    'taggit',
 ]
 
 MIDDLEWARE = [
