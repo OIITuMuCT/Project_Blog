@@ -71,8 +71,12 @@ def post_detail(request, year, month, day, post):
     form = CommentForm()
     
     # Список схожих комментариев пользователей
-    
-    
+    post_tags_ids = post.tags.values_list('id', flat=True)
+    similar_posts = Post.published.filter(tags__in=post_tags_ids)\
+                                .exclude(id=post.id)
+    similar_posts = similar_posts.annotate(same_tags=Count('tags'))\
+                                .order_by('-same_tags', 'publish')[:4]
+
     # try:
     #     post = Post.published.get(id=id)
     # except Post.DoesNotExist:
@@ -81,7 +85,8 @@ def post_detail(request, year, month, day, post):
                 'blog/post/detail.html',
                 {'post': post,
                 'comments': comments,
-                'form': form})
+                'form': form,
+                'similar_posts': similar_posts})
 
 class PostListView(ListView):
     """ 
