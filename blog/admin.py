@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Post # импортируем из файла модель.пу модель Пост
+from .models import Post, Comment # импортируем из файла модель.пу модель Пост
 
 # admin.site.register(Post)       # добавляем модельПост на сайт администратора джанго
 
@@ -16,4 +16,9 @@ class PostAdmin(admin.ModelAdmin):
     ordering = ['status', 'publish'] 
     
     
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ['name', 'email', 'created', 'active']
+    list_filter = ['active', 'created', 'updated']
+    search_fields = ['name', 'email', 'body']
     

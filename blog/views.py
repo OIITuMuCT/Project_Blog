@@ -1,9 +1,11 @@
 from django.shortcuts import render, get_object_or_404
-from .models import Post
+from .models import Post, Comment
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from django.views.generic import ListView
-from .forms import EmailPostForm
+from .forms import EmailPostForm, CommentForm
+from django.core.mail import send_mail
+from django.views.decorators.http import require_POST
 # from django.http import Http404
 # Create your views here.
 
@@ -31,27 +33,33 @@ def post_list(request):
         posts =paginator.page(paginator.num_pages) 
     
     return render(request,         
-                  'blog/post/list.html',
-                  {'posts': posts}) # прописываем путь для шаблона сайта и словарь Публикациями пост
- 
-   
+                'blog/post/list.html',
+                {'posts': posts}) # прописываем путь для шаблона сайта и словарь Публикациями пост
+
+
 def post_detail(request, year, month, day, post):
     post = get_object_or_404(Post,
-                             status=Post.Status.PUBLISHED,  # удаляем параметр id=id и добавляем год, месяц, день 
-                             slug=post, 
-                             publish__year=year, 
-                             publish__month=month,
-                             publish__day=day) 
+                            status=Post.Status.PUBLISHED,  # удаляем параметр id=id и добавляем год, месяц, день 
+                            slug=post, 
+                            publish__year=year, 
+                            publish__month=month,
+                            publish__day=day)
+    # Список активных комментариев к этому посту
+    # мы добавили набор запросов QuerySet, чтобы извлекать все активные
+    # комментарии к посту, как показано ниже:
+    comments = post.comments.filter(active=True)
+    # Форма для комментирования пользователя
+    form = CommentForm()
     # try:
     #     post = Post.published.get(id=id)
     # except Post.DoesNotExist:
     #     raise Http404('No Post found')
-    
     return render(request, 
-                  'blog/post/detail.html',
-                  {'post': post})
+                'blog/post/detail.html',
+                {'post': post,
+                'comments': comments,
+                'form': form})
 
-       
 class PostListView(ListView):
     """ 
     Альтернативное представление списка постов
@@ -61,20 +69,64 @@ class PostListView(ListView):
     paginate_by = 3 
     template_name = 'blog/post/list.html'
 
-   
+
 def post_share(request, post_id):
     # извлечь пост по идентификатору id 
-    post = get_object_or_404(Post,
-                             id=post_id,
-                             status=Post.Status.PUBLISHED) 
+    post = get_object_or_404(Post, 
+                            id=post_id, 
+                            status=Post.Status.PUBLISHED)
+    sent = False
+    
     if request.method == 'POST':
         # Форма была подана на обработку
         form = EmailPostForm(request.POST)
         if form.is_valid():
             # Поля формы успешно прошли валидацию
-            cd = form.changed_data
+            cd = form.cleaned_data
             # отправить электронное письмо
+            post_url = request.build_absolute_uri(post.get_absolute_url())
+            subject = f"{cd['name']} recommends you read " \
+                      f"{post.title}"
+            message = f"Read {post.title} at {post_url}\n\n" \
+                      f"{cd['name']}\'s comments: {cd['comments']}"
+            send_mail(subject, message, 'vatamancorp@gmail.com',
+                    [cd['to']])
+            sent = True
     else:
         form =EmailPostForm()
     return render(request, 'blog/post/share.html', {'post':post,
-                                                    'form': form})
+                                                    'form': form, 
+                                                    'sent': sent})
+    
+    
+@require_POST
+def post_comment(request, post_id):
+    # По ид поста извлекается опубликованный пост используя 
+    # функцию сокращенного доступа get_object_or_404(). 
+    post = get_object_or_404(Post, 
+                            id=post_id,
+                            status=Post.Status.PUBLISHED)
+    # Определяется переменная comment с изначальным значением None.
+    # Указанная переменная будет использоваться для хранения комментарного 
+    # объекта при его создании. 
+    comment = None
+    # Комментарий был отправлен
+    # Создается экземпляр формы, используя переданные на обработку 
+    # POST-данные, и проводиться их валидация методом is_valid()
+    form = CommentForm(data=request.POST)
+    # если форма валидна, то создается новый объект Comment
+    # Вызывая метод save() формы, и назначается переменной new_comment, 
+    # как показано ниже:
+    if form.is_valid():
+        # Создать объект класса Comment, не сохраняя его в базе данных
+        comment = form.save(commit=False)
+        # Назначить пост комментарию 
+        comment.post = post
+        # Сохранить комментарий в базе данных
+        comment.save()
+    return render(request, 'blog/post/comment.html',
+                            {'post': post,
+                            'form': form,
+                            'comment': comment})
+    
+    
