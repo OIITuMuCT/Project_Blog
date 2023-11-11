@@ -6,15 +6,31 @@ from django.views.generic import ListView
 from .forms import EmailPostForm, CommentForm
 from django.core.mail import send_mail
 from django.views.decorators.http import require_POST
+from taggit.models import Tag
+from django.db.models import Count
 # from django.http import Http404
 # Create your views here.
 
 
-def post_list(request):
-    post_list = Post.published.all()  # создаем переменную и выполняем queryset-запрос в базу данных ## заменили posts на post_list
+def post_list(request, tag_slug=None):
     # В данном представлении (Функции)извлекаются все посты со статусом PUBLISHED, 
     # используя менеджер published, который мы создали ранее.
+    # Добавили
+    # В представление опциональный параметр tag_slug, значение
+    # которого по умолчанию равно None. Этот параметр будет передан в URL-адресе.
+    post_list = Post.published.all()  # создаем переменную и выполняем queryset-запрос в базу данных ## заменили posts на post_list
     
+    tag = None
+    
+    
+    if tag_slug:
+        # Внутри указанного представления формируется изначальный набор
+        # запросов, извлекающий все опубликованные посты, и если имеется
+        # слаг данного тега, то берется объект Tag с данным слагом, 
+        # используя функцию сокращенного доступа get_object_or_404().
+        tag = get_object_or_404(Tag, slug=tag_slug)
+        # Здесь используется операция __in поиска по полю
+        post_list = post_list.filter(tags__in=[tag])
     # постраничная разбивка с 3 постами на страницу 
     paginator = Paginator(post_list, 3)      #  Создаем экземпляр класса Paginator с числом объектов возвращаемых в  расчете на страницу. 
     page_number = request.GET.get('page', 1) #  Мы извлекаем HTTP GET-параметр page и сохраняем его в переменной page_number.
@@ -34,7 +50,8 @@ def post_list(request):
     
     return render(request,         
                 'blog/post/list.html',
-                {'posts': posts}) # прописываем путь для шаблона сайта и словарь Публикациями пост
+                {'posts': posts,
+                'tag': tag}) # прописываем путь для шаблона сайта и словарь Публикациями пост add tag
 
 
 def post_detail(request, year, month, day, post):
@@ -44,12 +61,18 @@ def post_detail(request, year, month, day, post):
                             publish__year=year, 
                             publish__month=month,
                             publish__day=day)
-    # Список активных комментариев к этому посту
     # мы добавили набор запросов QuerySet, чтобы извлекать все активные
     # комментарии к посту, как показано ниже:
+    
+    # Список активных комментариев к этому посту
     comments = post.comments.filter(active=True)
+    
     # Форма для комментирования пользователя
     form = CommentForm()
+    
+    # Список схожих комментариев пользователей
+    
+    
     # try:
     #     post = Post.published.get(id=id)
     # except Post.DoesNotExist:

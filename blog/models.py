@@ -4,6 +4,8 @@ from django.utils import timezone
 from django.contrib.auth.models import User 
 from django.urls import reverse
 
+from taggit.managers import TaggableManager
+
 
 class PublishedManager(models.Manager): # вместе с менеджером добавили два поля в модель Пост
     def get_queryset(self) -> QuerySet:
@@ -37,7 +39,8 @@ class Post(models.Model):
     
     objects = models.Manager() # менеджер применяемый по умолчанию добавили вместе с классом  
     published = PublishedManager() # конкретно прикладной менеджер                 (PublishedManager)
-    
+    # Менеджер tags позволит добавлять, извлекать и удалять теги из объектов Post.
+    tags = TaggableManager() 
     
     class Meta:
         ordering = ['-publish'] # атрибут  ordering сортирует результаты по полю публикация
