@@ -27,6 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+SITE_ID = 1          # Site ID добавили
 
 # Application definition
 
@@ -40,6 +41,11 @@ INSTALLED_APPS = [
     
     'blog.apps.BlogConfig',  # Класс BlogConfig – это конфигурация приложения. Теперь Django знает,что для этого проекта приложение является активным, и сможет загружать модели приложения.
     'taggit',
+    
+    'django.contrib.sites',
+    'django.contrib.sitemaps',
+    'django.contrib.postgres',
+    
 ]
 
 MIDDLEWARE = [
@@ -78,8 +84,12 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',  # меняем базу sqlite on postgresql
+        'NAME': 'blog',                             # BASE_DIR / 'db.sqlite3', 
+        'USER': 'blog',
+        'PASSWORD': 'qwerty',
+        'HOST': 'localhost',
+        'PORT': '5432'
     }
 }
 

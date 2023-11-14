@@ -3,11 +3,13 @@ from .models import Post, Comment
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from django.views.generic import ListView
-from .forms import EmailPostForm, CommentForm
+from .forms import EmailPostForm, CommentForm, SearchForm
 from django.core.mail import send_mail
 from django.views.decorators.http import require_POST
 from taggit.models import Tag
 from django.db.models import Count
+from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank , TrigramSimilarity
+
 # from django.http import Http404
 # Create your views here.
 
@@ -158,3 +160,33 @@ def post_comment(request, post_id):
                             'comment': comment})
     
     
+def post_search(request):
+    form = SearchForm()
+    query = None
+    results = []
+    
+    if 'query' in request.GET:
+        form = SearchForm(request.GET)
+        if form.is_valid():
+            query = form.cleaned_data['query']
+            # если необходимо добавить удаление стоп-слов на других языках 
+            # добавить взвешивание векторов weight='A'
+            search_vector = SearchVector('title', weight='A') + \
+                            SearchVector('body', weight='B')
+            # добавляем параметр config='russian', в search_vector and search_query.
+            search_query = SearchQuery(query)
+            results = Post.published.annotate(
+                search = search_vector, 
+                rank = SearchRank(search_vector, search_query)
+            # для взвешивания изменить search=search_query в фильтре на
+            ).filter(rank__gte=0.3).order_by('-rank')
+            
+            # results = Post.published.annotate(
+            #     search = SearchVector('title', 'body'),
+            # ).filter(search=query)
+    
+    return render(request, 
+                'blog/post/search.html',
+                {'form': form,
+                'query': query,
+                'results': results})            
