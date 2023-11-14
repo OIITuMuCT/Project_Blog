@@ -176,10 +176,14 @@ def post_search(request):
             # добавляем параметр config='russian', в search_vector and search_query.
             search_query = SearchQuery(query)
             results = Post.published.annotate(
-                search = search_vector, 
-                rank = SearchRank(search_vector, search_query)
+                similarity =TrigramSimilarity('title', query),
+            ).filter(similarity__gt=0.1).order_by('-similarity')
+                # search = search_vector, 
+                # rank = SearchRank(search_vector, search_query)
             # для взвешивания изменить search=search_query в фильтре на
-            ).filter(rank__gte=0.3).order_by('-rank')
+            # заменили взвешивание на триграммное сходство установили в базу данных расширение 
+            # pg_trgm (команда для бд CREATE EXTENSION pg_trgm)
+            # ).filter(rank__gte=0.3).order_by('-rank')
             
             # results = Post.published.annotate(
             #     search = SearchVector('title', 'body'),
