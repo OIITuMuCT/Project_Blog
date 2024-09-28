@@ -118,7 +118,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'W-SU'
+TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 
@@ -137,8 +137,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # EMAIL settings
+
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' # для использования без смтп 
 # Конфигурация сервера электронной почты
+
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'vatamancorp@gmail.com'
 EMAIL_HOST_PASSWORD = 'gvoxoxoqxizjwlvp'
