@@ -82,10 +82,18 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
+# }
+
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',  # меняем базу sqlite on postgresql
-        'NAME': 'blog',                             # BASE_DIR / 'db.sqlite3', 
+        'NAME': 'blog',                             # BASE_DIR / 'db.sqlite3',
         'USER': 'blog',
         'PASSWORD': 'qwerty',
         'HOST': 'localhost',
@@ -138,7 +146,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # EMAIL settings
 
-# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' # для использования без смтп 
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' # для использования без смтп
 # Конфигурация сервера электронной почты
 
 EMAIL_HOST = 'smtp.gmail.com'

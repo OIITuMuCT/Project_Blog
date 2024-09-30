@@ -777,7 +777,7 @@
   "pk": 1,
   "fields": {
     "password": "pbkdf2_sha256$600000$eCV9y9pZ71bQvITuTYUOCG$WlntZn9z2pnUEAjfNGbOsuAB5NKWtWQ04KknMxiMeJQ=",
-    "last_login": "2023-11-09T21:12:03Z",
+    "last_login": "2024-09-30T15:58:51.633Z",
     "is_superuser": true,
     "username": "admin",
     "first_name": "",
@@ -894,6 +894,14 @@
   "fields": {
     "app_label": "sites",
     "model": "site"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "oke4fg8x3p5q2126suenwg78lm5ilq3k",
+  "fields": {
+    "session_data": ".eJxVjM0OwiAQhN-FsyHlx4V69O4zkGUXpGogKe3J-O62SQ96mmS-b-YtAq5LCWtPc5hYXIQSp98uIj1T3QE_sN6bpFaXeYpyV-RBu7w1Tq_r4f4dFOxlW1sCVFm7xMDERkXrDbnR2hGMAwcwnA2QzmwyoQY3ZMXKusget_RafL7aMzd5:1svInT:zJuWypHMOuRJlQxihM9yPMU2YSe3nNRkdfhaXR-wGkk",
+    "expire_date": "2024-10-14T15:58:51.639Z"
   }
 },
 {
